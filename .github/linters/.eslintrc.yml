@@ -43,7 +43,6 @@ rules:
     "import/no-namespace": "off",
     "no-console": "off",
     "no-unused-vars": "off",
-    "prettier/prettier": "error",
     "semi": "warn",
     "@typescript-eslint/array-type": "error",
     "@typescript-eslint/await-thenable": "error",

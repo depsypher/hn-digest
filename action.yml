@@ -24,6 +24,11 @@ inputs:
     description: "Postgres Database"
     required: true
 
+  pg-ssl:
+    description: "Postgres ssl"
+    required: true
+    default: "false"
+
   mode:
     description: "Either collect or send"
     required: true

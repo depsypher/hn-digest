@@ -57,3 +57,4 @@ jobs:
           pg-password: ${{ secrets.PG_PASSWORD }}
           pg-host: ${{ secrets.PG_HOST }}
           pg-database: "neondb"
+          pg-ssl: true

@@ -25,14 +25,14 @@ function getPostgresClient(): pg.Client {
     const pgPassword: string = core.getInput("pg-password");
     const pgHost: string = core.getInput("pg-host");
     const pgDatabase: string = core.getInput("pg-database");
-    const pgSSL: string = core.getInput("pg-ssl");
+    const pgSSL: boolean = core.getBooleanInput("pg-ssl");
 
     return new pg.Client({
         user: pgUser,
         password: pgPassword,
         host: pgHost,
         database: pgDatabase,
-        ssl: !!pgSSL,
+        ssl: pgSSL,
     });
 }
 
