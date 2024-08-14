@@ -1,0 +1,34 @@
+name: 'hn-digest'
+description: 'Creates an email digest of hacker news stories'
+author: 'Ray Vanderborght'
+
+# Add your action's branding here. This will appear on the GitHub Marketplace.
+branding:
+  icon: 'heart'
+  color: 'red'
+
+inputs:
+  pg-user:
+    description: 'Postgres User'
+    required: true
+
+  pg-password:
+    description: 'Postgres Password'
+    required: true
+
+  pg-host:
+    description: 'Postgres Host'
+    required: true
+
+  pg-database:
+    description: 'Postgres Database'
+    required: true
+
+  mode:
+    description: 'Either collect or send'
+    required: true
+    default: 'collect'
+
+runs:
+  using: node20
+  main: dist/index.js
