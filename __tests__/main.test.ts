@@ -15,6 +15,7 @@ const runMock = jest.spyOn(main, "run");
 // Mock the GitHub Actions core library
 let errorMock: jest.SpiedFunction<typeof core.error>;
 let getInputMock: jest.SpiedFunction<typeof core.getInput>;
+let getBooleanInputMock: jest.SpiedFunction<typeof core.getBooleanInput>;
 let setFailedMock: jest.SpiedFunction<typeof core.setFailed>;
 
 describe("action", () => {
@@ -22,6 +23,9 @@ describe("action", () => {
         jest.clearAllMocks();
         errorMock = jest.spyOn(core, "error").mockImplementation();
         getInputMock = jest.spyOn(core, "getInput").mockImplementation();
+        getBooleanInputMock = jest
+            .spyOn(core, "getBooleanInput")
+            .mockImplementation();
         setFailedMock = jest.spyOn(core, "setFailed").mockImplementation();
     });
 
@@ -42,6 +46,10 @@ describe("action", () => {
                 default:
                     return "";
             }
+        });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        getBooleanInputMock.mockImplementation((name) => {
+            return false;
         });
 
         await main.run();
