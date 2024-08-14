@@ -1,38 +1,38 @@
-import * as core from '@actions/core';
-import pg from 'pg';
+import * as core from "@actions/core";
+import pg from "pg";
 
-type Mode = 'collect' | 'send';
+type Mode = "collect" | "send";
 type TopStories = number[];
 type Story = {
-    story_id: number,
-    type: string,
-    deleted: boolean,
-    by: string,
-    time: number,
-    text: string,
-    dead: boolean,
-    url: string,
-    score: number,
-    title: string,
-    descendants: number
+    story_id: number;
+    type: string;
+    deleted: boolean;
+    by: string;
+    time: number;
+    text: string;
+    dead: boolean;
+    url: string;
+    score: number;
+    title: string;
+    descendants: number;
 };
 
 const HN_API_BASE = "https://hacker-news.firebaseio.com/v0";
 const STORY_COUNT = 30;
 
 function getPostgresClient(): pg.Client {
-    const pgUser: string = core.getInput('pg-user');
-    const pgPassword: string = core.getInput('pg-password');
-    const pgHost: string = core.getInput('pg-host');
-    const pgDatabase: string = core.getInput('pg-database');
-    const pgSSL: string = core.getInput('pg-ssl');
+    const pgUser: string = core.getInput("pg-user");
+    const pgPassword: string = core.getInput("pg-password");
+    const pgHost: string = core.getInput("pg-host");
+    const pgDatabase: string = core.getInput("pg-database");
+    const pgSSL: string = core.getInput("pg-ssl");
 
     return new pg.Client({
         user: pgUser,
         password: pgPassword,
         host: pgHost,
         database: pgDatabase,
-        ssl: !!pgSSL
+        ssl: !!pgSSL,
     });
 }
 
@@ -41,32 +41,46 @@ async function api<T>(url: string): Promise<T> {
     if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
     }
-    return await response.json() as Promise<T>;
+    return (await response.json()) as Promise<T>;
 }
 
 async function collect(): Promise<void> {
-    const topStories: TopStories = await api<TopStories>(`${HN_API_BASE}/topstories.json`);
+    const topStories: TopStories = await api<TopStories>(
+        `${HN_API_BASE}/topstories.json`,
+    );
     core.debug(`Fetched ${topStories.length} top stories`);
 
     const client: pg.Client = getPostgresClient();
     await client.connect();
 
-    await Promise.all(topStories.slice(0, STORY_COUNT).map(async id => {
-        const story = await api<Story>(`${HN_API_BASE}/item/${id}.json`);
-        if (story.type == 'story') {
-            await client.query('' +
-                    'INSERT INTO story' +
-                    ' (story_id, deleted, by, time, text, dead, url, score, title, descendants, first_seen, last_seen)' +
-                    ' VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())' +
-                    ' ON CONFLICT (story_id)' +
-                    ' DO UPDATE SET deleted = $2, dead = $6, score = $8, descendants = $10,' +
-                    '  last_seen = NOW()',
+    await Promise.all(
+        topStories.slice(0, STORY_COUNT).map(async (id) => {
+            const story = await api<Story>(`${HN_API_BASE}/item/${id}.json`);
+            if (story.type == "story") {
+                await client.query(
+                    "" +
+                        "INSERT INTO story" +
+                        " (story_id, deleted, by, time, text, dead, url, score, title, descendants, first_seen, last_seen)" +
+                        " VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())" +
+                        " ON CONFLICT (story_id)" +
+                        " DO UPDATE SET deleted = $2, dead = $6, score = $8, descendants = $10," +
+                        "  last_seen = NOW()",
                     [
-                        id, story.deleted, story.by, new Date(story.time * 1000), story.text,
-                        story.dead, story.url, story.score, story.title, story.descendants
-                    ]);
-        }
-    })).catch(err => {
+                        id,
+                        story.deleted,
+                        story.by,
+                        new Date(story.time * 1000),
+                        story.text,
+                        story.dead,
+                        story.url,
+                        story.score,
+                        story.title,
+                        story.descendants,
+                    ],
+                );
+            }
+        }),
+    ).catch((err) => {
         throw err;
     });
     core.debug(`Done collecting new stories`);
@@ -74,8 +88,7 @@ async function collect(): Promise<void> {
     await client.end();
 }
 
-async function send(): Promise<void> {
-}
+async function send(): Promise<void> {}
 
 /**
  * The main function for the action.
@@ -83,13 +96,13 @@ async function send(): Promise<void> {
  */
 export async function run(): Promise<void> {
     try {
-        const mode: Mode = core.getInput('mode') as Mode;
+        const mode: Mode = core.getInput("mode") as Mode;
 
         switch (mode) {
-            case 'collect':
+            case "collect":
                 await collect();
                 break;
-            case 'send':
+            case "send":
                 await send();
                 break;
             default:

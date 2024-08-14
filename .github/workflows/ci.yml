@@ -57,7 +57,7 @@ jobs:
         id: test-action
         uses: ./
         with:
-          pg-user: 'neondb_owner'
-          pg-password:  ${{ secrets.PG_PASSWORD }}
+          pg-user: "neondb_owner"
+          pg-password: ${{ secrets.PG_PASSWORD }}
           pg-host: ${{ secrets.PG_HOST }}
-          pg-database: 'neondb'
+          pg-database: "neondb"

@@ -1,33 +1,33 @@
-name: 'hn-digest'
-description: 'Creates an email digest of hacker news stories'
-author: 'Ray Vanderborght'
+name: "hn-digest"
+description: "Creates an email digest of hacker news stories"
+author: "Ray Vanderborght"
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: "heart"
+  color: "red"
 
 inputs:
   pg-user:
-    description: 'Postgres User'
+    description: "Postgres User"
     required: true
 
   pg-password:
-    description: 'Postgres Password'
+    description: "Postgres Password"
     required: true
 
   pg-host:
-    description: 'Postgres Host'
+    description: "Postgres Host"
     required: true
 
   pg-database:
-    description: 'Postgres Database'
+    description: "Postgres Database"
     required: true
 
   mode:
-    description: 'Either collect or send'
+    description: "Either collect or send"
     required: true
-    default: 'collect'
+    default: "collect"
 
 runs:
   using: node20
