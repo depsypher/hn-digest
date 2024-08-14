@@ -30716,13 +30716,13 @@ function getPostgresClient() {
     const pgPassword = core.getInput("pg-password");
     const pgHost = core.getInput("pg-host");
     const pgDatabase = core.getInput("pg-database");
-    const pgSSL = core.getInput("pg-ssl");
+    const pgSSL = core.getBooleanInput("pg-ssl");
     return new pg_1.default.Client({
         user: pgUser,
         password: pgPassword,
         host: pgHost,
         database: pgDatabase,
-        ssl: !!pgSSL,
+        ssl: pgSSL,
     });
 }
 async function api(url) {
