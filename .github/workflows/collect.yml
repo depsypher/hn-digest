@@ -1,0 +1,31 @@
+name: Collect
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  security-events: write
+
+jobs:
+  collect:
+    name: Collect Stories
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Collect Stories
+        id: collect-stories
+        uses: ./
+        with:
+          pg-user: "neondb_owner"
+          pg-password: ${{ secrets.PG_PASSWORD }}
+          pg-host: ${{ secrets.PG_HOST }}
+          pg-database: "neondb"
+          pg-ssl: true
