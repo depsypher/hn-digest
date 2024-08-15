@@ -30732,15 +30732,13 @@ async function api(url) {
     }
     return (await response.json());
 }
-async function collect() {
+async function collect(db) {
     const topStories = await api(`${HN_API_BASE}/topstories.json`);
     core.debug(`Fetched ${topStories.length} top stories`);
-    const client = getPostgresClient();
-    await client.connect();
     await Promise.all(topStories.slice(0, STORY_COUNT).map(async (id) => {
         const story = await api(`${HN_API_BASE}/item/${id}.json`);
         if (story.type == "story") {
-            await client.query("" +
+            await db.query("" +
                 "INSERT INTO story" +
                 " (story_id, deleted, by, time, text, dead, url, score, title, descendants, first_seen, last_seen)" +
                 " VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())" +
@@ -30763,32 +30761,78 @@ async function collect() {
         throw err;
     });
     core.debug(`Done collecting new stories`);
-    await client.end();
 }
-async function send() { }
+async function sendMail(MAILGUN_DOMAIN, emails, html, MAILGUN_KEY) {
+    const data = new URLSearchParams();
+    data.append("from", `DIY HN Digest <hn@${MAILGUN_DOMAIN}>`);
+    data.append("to", emails[0]);
+    data.append("subject", "HN Digest");
+    data.append("text", "");
+    data.append("html", html);
+    const request = new Request(`https://api.mailgun.net/v3/${MAILGUN_DOMAIN}/messages`, {
+        method: "POST",
+        headers: {
+            Authorization: "Basic " +
+                Buffer.from(`api:${MAILGUN_KEY}`).toString("base64"),
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: data,
+    });
+    await api(request);
+}
+async function send(db) {
+    const config = await db.query("SELECT emails, next_send FROM config where config_id = 'v1'");
+    const emails = config.rows[0].emails;
+    const nextSend = config.rows[0].next_send;
+    if (new Date() >= nextSend && emails.length > 0) {
+        const stories = await db.query("" +
+            " WITH cte AS (" +
+            "   SELECT story_id," +
+            "          by," +
+            "          text," +
+            "          url," +
+            "          title," +
+            "          score," +
+            "          descendants," +
+            "          percent_rank() OVER (ORDER BY score)       AS score_rank," +
+            "          percent_rank() OVER (ORDER BY descendants) AS comment_rank" +
+            "   FROM story" +
+            "   WHERE last_seen > NOW() - (SELECT send_interval FROM config WHERE config_id = 'v1'))" +
+            " SELECT *, score_rank + comment_rank AS rank" +
+            " FROM cte" +
+            " ORDER BY rank DESC" +
+            " LIMIT 10");
+        let html = "<ul>";
+        for (const story of stories.rows) {
+            html += `<li>
+                <a href="https://news.ycombinator.com/item?id=${story.story_id}">${story.title}</a>
+              </li>`;
+        }
+        const MAILGUN_DOMAIN = core.getInput("mailgun-domain");
+        const MAILGUN_KEY = core.getInput("mailgun-key");
+        await sendMail(MAILGUN_DOMAIN, emails, html, MAILGUN_KEY);
+        // increment the next email send time
+        await db.query("UPDATE config SET next_send = next_send + send_interval WHERE config_id = 'v1'");
+    }
+}
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
+    const db = getPostgresClient();
     try {
-        const mode = core.getInput("mode");
-        switch (mode) {
-            case "collect":
-                await collect();
-                break;
-            case "send":
-                await send();
-                break;
-            default:
-                // noinspection ExceptionCaughtLocallyJS
-                throw new Error("Invalid mode");
-        }
+        await db.connect();
+        await collect(db);
+        await send(db);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
         if (error instanceof Error)
             core.setFailed(error.message);
+    }
+    finally {
+        await db.end();
     }
 }
 

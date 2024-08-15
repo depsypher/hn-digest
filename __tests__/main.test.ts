@@ -41,8 +41,10 @@ describe("action", () => {
                     return process.env.INPUT_PG_HOST as string;
                 case "pg-database":
                     return process.env.INPUT_PG_DATABASE as string;
-                case "mode":
-                    return "collect";
+                case "mailgun-domain":
+                    return process.env.INPUT_MAILGUN_DOMAIN as string;
+                case "mailgun-key":
+                    return process.env.INPUT_MAILGUN_KEY as string;
                 default:
                     return "";
             }

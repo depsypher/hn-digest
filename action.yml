@@ -29,11 +29,6 @@ inputs:
     required: true
     default: "false"
 
-  mode:
-    description: "Either collect or send"
-    required: true
-    default: "collect"
-
 runs:
   using: node20
   main: dist/index.js

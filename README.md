@@ -9,8 +9,10 @@ This github action periodically polls hacker news for stories appearing on the f
 
 ## How it works
 
-- The action is used in a workflow configured to 'collect' stories on a schedule (e.g every hour). It puts these in the 'story' table in the database. The top 30 stories are upserted, with their comment counts and last_seen dates continuously updated. That way we have some stats for determining which stories are 'best'.
-- The action is used in a separate workflow configured on a different schedule (e.g. once a day) to 'send' the best stories to email addresses you specify.
+-   The action is used in a workflow configured to collect stories on a schedule (e.g every hour) which it puts in the `story` table in the database.
+-   On every run the current top stories are upserted, with their scores and comment counts continuously updated.
+-   Then after each run, if the current time is after the `next_send` time in the `config` table the top stories are queried and sent to the emails set in `config` and `next_send` is incremented.
+-   The metric for ranking the best stories is combined percentile rank of score and number of comments for stories collected since the last send.
 
 ## You'll need
 
