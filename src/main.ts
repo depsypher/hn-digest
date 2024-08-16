@@ -112,6 +112,7 @@ async function sendMail(
 }
 
 async function send(db: pg.Client): Promise<void> {
+    core.debug(`Sending best stories`);
     const config = await db.query(
         "SELECT emails, next_send FROM config where config_id = 'v1'",
     );

@@ -29,6 +29,14 @@ inputs:
     required: true
     default: "false"
 
+  mailgun-domain:
+    description: "Mailgun domain"
+    required: true
+
+  mailgun-key:
+    description: "Mailgun api key"
+    required: true
+
 runs:
   using: node20
   main: dist/index.js
