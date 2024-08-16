@@ -31,4 +31,3 @@ jobs:
           pg-ssl: true
           mailgun-domain: ${{ secrets.MAILGUN_DOMAIN }}
           mailgun-key: ${{ secrets.MAILGUN_KEY }}
-

@@ -30781,6 +30781,7 @@ async function sendMail(MAILGUN_DOMAIN, emails, html, MAILGUN_KEY) {
     await api(request);
 }
 async function send(db) {
+    core.debug(`Sending best stories`);
     const config = await db.query("SELECT emails, next_send FROM config where config_id = 'v1'");
     const emails = config.rows[0].emails;
     const nextSend = config.rows[0].next_send;
