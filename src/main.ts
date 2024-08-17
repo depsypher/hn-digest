@@ -145,6 +145,11 @@ async function send(db: pg.Client): Promise<void> {
         for (const story of stories.rows) {
             html += `<li>
                 <a href="https://news.ycombinator.com/item?id=${story.story_id}">${story.title}</a>
+                <div style="margin: 0 0 .5rem">
+                  Score: ${story.score} (%${(story.score_rank * 100).toFixed(0)}th)
+                  Comments: ${story.descendants} (%${(story.comment_rank * 100).toFixed(0)}th)
+                  Rank: ${story.rank.toFixed(2)}
+                </div>
               </li>`;
         }
 
