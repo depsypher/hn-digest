@@ -8,11 +8,15 @@ virtualConsole.on("error", () => {
 });
 
 async function text(url: RequestInfo): Promise<string> {
-    const response = await fetch(url);
-    if (!response.ok) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            return Promise.resolve("");
+        }
+        return await response.text();
+    } catch {
         return Promise.resolve("");
     }
-    return await response.text();
 }
 
 function clean(input: string, length: number): string {
