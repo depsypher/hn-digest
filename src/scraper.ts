@@ -25,10 +25,13 @@ function clean(input: string, length: number): string {
 }
 
 export async function content(url: string): Promise<string> {
-    const html: string = await text(new Request(url));
-
-    const content = scrape(new JSDOM(html, { virtualConsole }));
-    return clean(content, 5000);
+    try {
+        const html: string = await text(new Request(url));
+        const content = scrape(new JSDOM(html, { virtualConsole }));
+        return clean(content, 5000);
+    } catch {
+        return "";
+    }
 }
 
 export function scrape(doc: JSDOM): string {
