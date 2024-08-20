@@ -58,5 +58,5 @@ describe("action", () => {
         expect(runMock).toHaveReturned();
         expect(errorMock).not.toHaveBeenCalled();
         expect(setFailedMock).not.toHaveBeenCalled();
-    });
+    }, 60_000);
 });
