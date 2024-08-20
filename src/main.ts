@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import pg from "pg";
+import { content } from "./scraper";
 
 type TopStories = number[];
 type Story = {
@@ -43,6 +44,13 @@ async function api<T>(url: RequestInfo): Promise<T> {
     return (await response.json()) as Promise<T>;
 }
 
+function truncate(input: string, length: number): string {
+    if (input.length > length) {
+        return input.slice(0, length);
+    }
+    return input;
+}
+
 async function collect(db: pg.Client): Promise<void> {
     const topStories: TopStories = await api<TopStories>(
         `${HN_API_BASE}/topstories.json`,
@@ -52,12 +60,14 @@ async function collect(db: pg.Client): Promise<void> {
     await Promise.all(
         topStories.slice(0, STORY_COUNT).map(async (id) => {
             const story = await api<Story>(`${HN_API_BASE}/item/${id}.json`);
-            if (story.type == "story") {
+            if (story.type == "story" && story.url) {
+                const text: string = await content(story.url);
+
                 await db.query(
                     "" +
                         "INSERT INTO story" +
-                        " (story_id, deleted, by, time, text, dead, url, score, title, descendants, first_seen, last_seen)" +
-                        " VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())" +
+                        " (story_id, deleted, by, time, text, dead, url, score, title, descendants, content, first_seen, last_seen)" +
+                        " VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())" +
                         " ON CONFLICT (story_id)" +
                         " DO UPDATE SET deleted = $2, dead = $6, score = $8, descendants = $10," +
                         "  last_seen = NOW()",
@@ -72,11 +82,13 @@ async function collect(db: pg.Client): Promise<void> {
                         story.score,
                         story.title,
                         story.descendants,
+                        text,
                     ],
                 );
             }
         }),
     ).catch((err) => {
+        core.error("Error collecting stories");
         throw err;
     });
     core.debug(`Done collecting new stories`);
@@ -131,6 +143,7 @@ async function send(db: pg.Client): Promise<void> {
                 "          title," +
                 "          score," +
                 "          descendants," +
+                "          content," +
                 "          percent_rank() OVER (ORDER BY score)       AS score_rank," +
                 "          percent_rank() OVER (ORDER BY descendants) AS comment_rank" +
                 "   FROM story" +
@@ -150,6 +163,7 @@ async function send(db: pg.Client): Promise<void> {
                   Comments: ${story.descendants} (%${(story.comment_rank * 100).toFixed(0)}th)
                   Rank: ${story.rank.toFixed(2)}
                 </div>
+                <div style="margin: 0 0 .5rem">${truncate(story.content ?? "", 100)}</div>
               </li>`;
         }
 
@@ -176,6 +190,7 @@ export async function run(): Promise<void> {
         await collect(db);
         await send(db);
     } catch (error) {
+        core.error(`Caught ${error}`);
         // Fail the workflow run if an error occurs
         if (error instanceof Error) core.setFailed(error.message);
     } finally {

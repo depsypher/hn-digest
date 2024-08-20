@@ -30,4 +30,4 @@ CREATE TABLE story
     first_seen  TIMESTAMP WITHOUT TIME ZONE NOT NULL,   -- First time we've seen this record
     last_seen   TIMESTAMP WITHOUT TIME ZONE  -- Last time we've seen this record
 );
-
+ALTER TABLE story ADD COLUMN content TEXT;
