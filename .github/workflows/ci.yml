@@ -34,15 +34,7 @@ jobs:
 
       - name: Test
         id: npm-ci-test
-        run: npm run ci-test
-        with:
-          pg-user: "neondb_owner"
-          pg-password: ${{ secrets.PG_PASSWORD }}
-          pg-host: ${{ secrets.PG_HOST }}
-          pg-database: "neondb"
-          pg-ssl: true
-          mailgun-domain: ${{ secrets.MAILGUN_DOMAIN }}
-          mailgun-key: ${{ secrets.MAILGUN_KEY }}
+        run: INPUT_PG_USER=neondb_owner INPUT_PG_PASSWORD=${{ secrets.PG_PASSWORD }} INPUT_PG_HOST=${{ secrets.PG_HOST }} INPUT_PG_DATABASE=neondb INPUT_PG_SSL=true npm run ci-test
 
   test-action:
     name: GitHub Actions Test
