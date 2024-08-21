@@ -30818,7 +30818,7 @@ async function send(db) {
 async function run() {
     const db = getPostgresClient();
     try {
-        await db.connect();
+        // await db.connect();
         //        await collect(db);
         // await send(db);
     }

@@ -186,7 +186,7 @@ export async function run(): Promise<void> {
     const db: pg.Client = getPostgresClient();
 
     try {
-        await db.connect();
+        // await db.connect();
         //        await collect(db);
         // await send(db);
     } catch (error) {
