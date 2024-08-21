@@ -30743,28 +30743,7 @@ async function collect(db) {
     core.debug(`Fetched ${topStories.length} top stories`);
     await Promise.all(topStories.slice(0, STORY_COUNT).map(async (id) => {
         const story = await api(`${HN_API_BASE}/item/${id}.json`);
-        if (story.type == "story" && story.url) {
-            const text = "test"; //await content(story.url);
-            await db.query("" +
-                "INSERT INTO story" +
-                " (story_id, deleted, by, time, text, dead, url, score, title, descendants, content, first_seen, last_seen)" +
-                " VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())" +
-                " ON CONFLICT (story_id)" +
-                " DO UPDATE SET deleted = $2, dead = $6, score = $8, descendants = $10," +
-                "  last_seen = NOW()", [
-                id,
-                story.deleted,
-                story.by,
-                new Date(story.time * 1000),
-                story.text,
-                story.dead,
-                story.url,
-                story.score,
-                story.title,
-                story.descendants,
-                text,
-            ]);
-        }
+        if (false) {}
     })).catch((err) => {
         core.error("Error collecting stories");
         throw err;
