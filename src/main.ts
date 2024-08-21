@@ -188,7 +188,7 @@ export async function run(): Promise<void> {
     try {
         await db.connect();
         //        await collect(db);
-        await send(db);
+        // await send(db);
     } catch (error) {
         core.error(`Caught ${error}`);
         // Fail the workflow run if an error occurs

@@ -30820,7 +30820,7 @@ async function run() {
     try {
         await db.connect();
         //        await collect(db);
-        await send(db);
+        // await send(db);
     }
     catch (error) {
         core.error(`Caught ${error}`);
