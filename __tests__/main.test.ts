@@ -51,7 +51,7 @@ describe("action", () => {
         });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         getBooleanInputMock.mockImplementation((name) => {
-            return false;
+            return process.env.INPUT_PG_SSL === "true";
         });
 
         await main.run();

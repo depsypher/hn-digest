@@ -60,8 +60,8 @@ async function collect(db: pg.Client): Promise<void> {
     await Promise.all(
         topStories.slice(0, STORY_COUNT).map(async (id) => {
             const story = await api<Story>(`${HN_API_BASE}/item/${id}.json`);
-            if (false && story.type == "story" && story.url) {
-                const text: string = "test"; //await content(story.url);
+            if (story.type == "story" && story.url) {
+                const text: string = await content(story.url);
 
                 await db.query(
                     "" +
@@ -186,9 +186,9 @@ export async function run(): Promise<void> {
     const db: pg.Client = getPostgresClient();
 
     try {
-        // await db.connect();
-        //        await collect(db);
-        // await send(db);
+        await db.connect();
+        await collect(db);
+        await send(db);
     } catch (error) {
         core.error(`Caught ${error}`);
         // Fail the workflow run if an error occurs
