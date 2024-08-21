@@ -187,7 +187,7 @@ export async function run(): Promise<void> {
 
     try {
         await db.connect();
-        await collect(db);
+        //        await collect(db);
         await send(db);
     } catch (error) {
         core.error(`Caught ${error}`);
