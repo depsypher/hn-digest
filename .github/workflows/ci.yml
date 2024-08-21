@@ -53,6 +53,6 @@ jobs:
           pg-password: ${{ secrets.PG_PASSWORD }}
           pg-host: ${{ secrets.PG_HOST }}
           pg-database: "neondb"
-          pg-ssl: "true"
+          pg-ssl: true
           mailgun-domain: ${{ secrets.MAILGUN_DOMAIN }}
           mailgun-key: ${{ secrets.MAILGUN_KEY }}

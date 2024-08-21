@@ -32,7 +32,7 @@ function getPostgresClient(): pg.Client {
         password: pgPassword,
         host: pgHost,
         database: pgDatabase,
-        ssl: pgSSL,
+        ssl: true,
     });
 }
 
