@@ -61,7 +61,7 @@ async function collect(db: pg.Client): Promise<void> {
         topStories.slice(0, STORY_COUNT).map(async (id) => {
             const story = await api<Story>(`${HN_API_BASE}/item/${id}.json`);
             if (story.type == "story" && story.url) {
-                const text: string = await content(story.url);
+                const text: string = "test"; //await content(story.url);
 
                 await db.query(
                     "" +
