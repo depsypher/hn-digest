@@ -173,7 +173,7 @@ async function send(db: pg.Client): Promise<void> {
 
         // increment the next email send time
         await db.query(
-            "UPDATE config SET next_send = next_send + send_interval WHERE config_id = 'v1'",
+            "UPDATE config SET next_send = CAST(NOW() AS DATE) + CAST(next_send AS TIME) + send_interval WHERE config_id = 'v1'",
         );
     }
 }
