@@ -155,6 +155,7 @@ async function send(db: pg.Client): Promise<void> {
         );
 
         let html = "<ul>";
+        const storyIds = [];
         for (const story of stories.rows) {
             html += `<li>
                 <a href="https://news.ycombinator.com/item?id=${story.story_id}">${story.title}</a>
@@ -165,6 +166,7 @@ async function send(db: pg.Client): Promise<void> {
                 </div>
                 <div style="margin: 0 0 .5rem">${truncate(story.content ?? "", 100)}</div>
               </li>`;
+            storyIds.push(story.story_id);
         }
 
         const MAILGUN_DOMAIN = core.getInput("mailgun-domain");
@@ -175,6 +177,9 @@ async function send(db: pg.Client): Promise<void> {
         await db.query(
             "UPDATE config SET next_send = CAST(NOW() AS DATE) + CAST(next_send AS TIME) + send_interval WHERE config_id = 'v1'",
         );
+
+        // record the stories sent in the database
+        await db.query("INSERT INTO digest (stories) VALUES ($1)", storyIds);
     }
 }
 

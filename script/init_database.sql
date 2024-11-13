@@ -31,3 +31,11 @@ CREATE TABLE story
     last_seen   TIMESTAMPTZ                  -- Last time we've seen this record
 );
 ALTER TABLE story ADD COLUMN content TEXT;
+
+CREATE SEQUENCE seq;
+CREATE TABLE digest
+(
+    digest_id   BIGINT PRIMARY KEY DEFAULT nextval('seq'),
+    created     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    stories     BIGINT[]
+);
