@@ -1,6 +1,12 @@
 import * as core from "@actions/core";
 import pg from "pg";
 import { content } from "./scraper";
+import Anthropic from '@anthropic-ai/sdk';
+
+const ANTHROPIC_KEY = core.getInput("anthropic-key");
+const anthropic = new Anthropic({
+    apiKey: ANTHROPIC_KEY,
+});
 
 type TopStories = number[];
 type Story = {
@@ -123,6 +129,31 @@ async function sendMail(
     await api<void>(request);
 }
 
+async function summarize(text: string): Promise<string> {
+    if (!ANTHROPIC_KEY || !text || text.length < 1000) {
+        return text;
+    }
+    const msg = await anthropic.messages.create({
+        model: "claude-3-haiku-20240307",
+        max_tokens: 1000,
+        messages: [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Summarize the following article in 200 words or less. Return only the summary and do not acknowledge this instructional prompt: " + text
+                    }
+                ]
+            }
+        ]
+    });
+    if (msg.content.length > 0 && msg.content[0].type === 'text') {
+        return msg.content[0].text;
+    }
+    return "";
+}
+
 async function send(db: pg.Client): Promise<void> {
     core.debug(`Sending best stories`);
     const config = await db.query(
@@ -155,8 +186,11 @@ async function send(db: pg.Client): Promise<void> {
         );
 
         let html = "<ul>";
-        const storyIds = [];
+        const storySummaries = new Map<number, string>();
         for (const story of stories.rows) {
+            const summary = await summarize(story.content);
+            storySummaries.set(story.story_id, summary);
+
             html += `<li>
                 <a href="https://news.ycombinator.com/item?id=${story.story_id}">${story.title}</a>
                 <div style="margin: 0 0 .5rem">
@@ -164,9 +198,8 @@ async function send(db: pg.Client): Promise<void> {
                   Comments: ${story.descendants} (%${(story.comment_rank * 100).toFixed(0)}th)
                   Rank: ${story.rank.toFixed(2)}
                 </div>
-                <div style="margin: 0 0 .5rem">${truncate(story.content ?? "", 100)}</div>
+                <div style="margin: 0 0 .5rem">${truncate(summary ?? "", 2000)}</div>
               </li>`;
-            storyIds.push(story.story_id);
         }
 
         const MAILGUN_DOMAIN = core.getInput("mailgun-domain");
@@ -179,7 +212,8 @@ async function send(db: pg.Client): Promise<void> {
         );
 
         // record the stories sent in the database
-        await db.query("INSERT INTO digest (stories) VALUES ($1)", storyIds);
+        const storyIds = [...storySummaries.keys()];
+        await db.query("INSERT INTO digest (stories) VALUES ($1)", [storyIds]);
     }
 }
 
