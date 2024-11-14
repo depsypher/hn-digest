@@ -37,6 +37,10 @@ inputs:
     description: "Mailgun api key"
     required: true
 
+  anthropic-key:
+    description: "Anthropic api key"
+    required: false
+
 runs:
   using: node20
   main: dist/index.js
