@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import pg from "pg";
 import { content } from "./scraper";
-import Anthropic from '@anthropic-ai/sdk';
+import Anthropic from "@anthropic-ai/sdk";
 
 const ANTHROPIC_KEY = core.getInput("anthropic-key");
 const anthropic = new Anthropic({
@@ -138,17 +138,19 @@ async function summarize(text: string): Promise<string> {
         max_tokens: 1000,
         messages: [
             {
-                "role": "user",
-                "content": [
+                role: "user",
+                content: [
                     {
-                        "type": "text",
-                        "text": "Summarize the following article in 200 words or less. Return only the summary and do not acknowledge this instructional prompt: " + text
-                    }
-                ]
-            }
-        ]
+                        type: "text",
+                        text:
+                            "Summarize the following article in 200 words or less. Return only the summary and do not acknowledge this instructional prompt: " +
+                            text,
+                    },
+                ],
+            },
+        ],
     });
-    if (msg.content.length > 0 && msg.content[0].type === 'text') {
+    if (msg.content.length > 0 && msg.content[0].type === "text") {
         return msg.content[0].text;
     }
     return "";
