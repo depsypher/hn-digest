@@ -66,7 +66,7 @@ async function collect(db: pg.Client): Promise<void> {
     await Promise.all(
         topStories.slice(0, STORY_COUNT).map(async (id) => {
             const story = await api<Story>(`${HN_API_BASE}/item/${id}.json`);
-            if (story.type == "story" && story.url) {
+            if (story.type === "story" && story.url) {
                 const text: string = await content(story.url);
 
                 await db.query(
@@ -167,24 +167,27 @@ async function send(db: pg.Client): Promise<void> {
 
     if (new Date() >= nextSend && emails.length > 0) {
         const stories = await db.query(
-            "" +
-                " WITH cte AS (" +
-                "   SELECT story_id," +
-                "          by," +
-                "          text," +
-                "          url," +
-                "          title," +
-                "          score," +
-                "          descendants," +
-                "          content," +
-                "          percent_rank() OVER (ORDER BY score)       AS score_rank," +
-                "          percent_rank() OVER (ORDER BY descendants) AS comment_rank" +
-                "   FROM story" +
-                "   WHERE last_seen > NOW() - (SELECT send_interval FROM config WHERE config_id = 'v1'))" +
-                " SELECT *, score_rank + comment_rank AS rank" +
-                " FROM cte" +
-                " ORDER BY rank DESC" +
-                " LIMIT 10",
+          "" +
+          " WITH stories AS (" +
+          "      SELECT story_id," +
+          "             by," +
+          "             text," +
+          "             url," +
+          "             title," +
+          "             score," +
+          "             descendants," +
+          "             content," +
+          "             PERCENT_RANK() OVER (ORDER BY score)       AS score_rank," +
+          "             PERCENT_RANK() OVER (ORDER BY descendants) AS comment_rank" +
+          "      FROM story" +
+          "      WHERE last_seen > NOW() - (SELECT send_interval FROM config WHERE config_id = 'v1'))" +
+          " SELECT *, score_rank + comment_rank AS rank" +
+          " FROM stories " +
+          " WHERE stories.story_id NOT IN (" +
+          "       SELECT UNNEST(stories) AS story_id" +
+          "       FROM digest WHERE digest_id = (SELECT MAX(digest_id) FROM digest))" +
+          " ORDER BY rank DESC" +
+          " LIMIT 10;",
         );
 
         let html = "<ul>";
