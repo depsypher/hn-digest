@@ -167,27 +167,27 @@ async function send(db: pg.Client): Promise<void> {
 
     if (new Date() >= nextSend && emails.length > 0) {
         const stories = await db.query(
-          "" +
-          " WITH stories AS (" +
-          "      SELECT story_id," +
-          "             by," +
-          "             text," +
-          "             url," +
-          "             title," +
-          "             score," +
-          "             descendants," +
-          "             content," +
-          "             PERCENT_RANK() OVER (ORDER BY score)       AS score_rank," +
-          "             PERCENT_RANK() OVER (ORDER BY descendants) AS comment_rank" +
-          "      FROM story" +
-          "      WHERE last_seen > NOW() - (SELECT send_interval FROM config WHERE config_id = 'v1'))" +
-          " SELECT *, score_rank + comment_rank AS rank" +
-          " FROM stories " +
-          " WHERE stories.story_id NOT IN (" +
-          "       SELECT UNNEST(stories) AS story_id" +
-          "       FROM digest WHERE digest_id = (SELECT MAX(digest_id) FROM digest))" +
-          " ORDER BY rank DESC" +
-          " LIMIT 10;",
+            "" +
+                " WITH stories AS (" +
+                "      SELECT story_id," +
+                "             by," +
+                "             text," +
+                "             url," +
+                "             title," +
+                "             score," +
+                "             descendants," +
+                "             content," +
+                "             PERCENT_RANK() OVER (ORDER BY score)       AS score_rank," +
+                "             PERCENT_RANK() OVER (ORDER BY descendants) AS comment_rank" +
+                "      FROM story" +
+                "      WHERE last_seen > NOW() - (SELECT send_interval FROM config WHERE config_id = 'v1'))" +
+                " SELECT *, score_rank + comment_rank AS rank" +
+                " FROM stories " +
+                " WHERE stories.story_id NOT IN (" +
+                "       SELECT UNNEST(stories) AS story_id" +
+                "       FROM digest WHERE digest_id = (SELECT MAX(digest_id) FROM digest))" +
+                " ORDER BY rank DESC" +
+                " LIMIT 10;",
         );
 
         let html = "<ul>";
