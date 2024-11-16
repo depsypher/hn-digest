@@ -39,3 +39,6 @@ CREATE TABLE digest
     created     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     stories     BIGINT[]
 );
+
+CREATE EXTENSION vector;
+ALTER TABLE story ADD COLUMN embedding vector(512); -- using voyage-3-lite

@@ -41,6 +41,10 @@ inputs:
     description: "Anthropic api key"
     required: false
 
+  voyageai-key:
+    description: "Voyage AI api key"
+    required: false
+
 runs:
   using: node20
   main: dist/index.js

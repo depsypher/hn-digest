@@ -32,3 +32,4 @@ jobs:
           mailgun-domain: ${{ secrets.MAILGUN_DOMAIN }}
           mailgun-key: ${{ secrets.MAILGUN_KEY }}
           anthropic-key: ${{ secrets.ANTHROPIC_KEY }}
+          voyageai-key: ${{ secrets.VOYAGEAI_KEY }}

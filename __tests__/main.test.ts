@@ -45,6 +45,10 @@ describe("action", () => {
                     return process.env.INPUT_MAILGUN_DOMAIN as string;
                 case "mailgun-key":
                     return process.env.INPUT_MAILGUN_KEY as string;
+                // case "anthropic-key":
+                //     return process.env.INPUT_ANTHROPIC_KEY as string;
+                // case "voyageai-key":
+                //     return process.env.INPUT_VOYAGEAI_KEY as string;
                 default:
                     return "";
             }

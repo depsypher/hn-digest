@@ -1,12 +1,10 @@
 import * as core from "@actions/core";
 import pg from "pg";
+import pgvector from 'pgvector/pg';
 import { content } from "./scraper";
 import Anthropic from "@anthropic-ai/sdk";
-
-const ANTHROPIC_KEY = core.getInput("anthropic-key");
-const anthropic = new Anthropic({
-    apiKey: ANTHROPIC_KEY,
-});
+import { VoyageAIClient } from "voyageai";
+import { EmbedResponse } from 'voyageai/api';
 
 type TopStories = number[];
 type Story = {
@@ -130,6 +128,11 @@ async function sendMail(
 }
 
 async function summarize(text: string): Promise<string> {
+    const ANTHROPIC_KEY = core.getInput("anthropic-key");
+    const anthropic = new Anthropic({
+        apiKey: ANTHROPIC_KEY,
+    });
+
     if (!ANTHROPIC_KEY || !text || text.length < 1000) {
         return text;
     }
@@ -143,7 +146,7 @@ async function summarize(text: string): Promise<string> {
                     {
                         type: "text",
                         text:
-                            "Summarize the following article in 200 words or less. Return only the summary and do not acknowledge this instructional prompt: " +
+                            "Summarize the following article in under 200 words. Return only the summary and do not acknowledge this instructional prompt or mention the word count: " +
                             text,
                     },
                 ],
@@ -154,6 +157,26 @@ async function summarize(text: string): Promise<string> {
         return msg.content[0].text;
     }
     return "";
+}
+
+async function embedding(text: string): Promise<number[]> {
+    const VOYAGEAI_KEY = core.getInput("voyageai-key");
+    const voyageai = new VoyageAIClient({
+        apiKey: VOYAGEAI_KEY
+    });
+
+    if (!VOYAGEAI_KEY || !text) {
+        return [];
+    }
+    const result: EmbedResponse = await voyageai.embed({
+        input: text,
+        model: "voyage-3-lite",
+    });
+
+    if (result.data && result.data.length === 1 && result.data[0].embedding) {
+        return result.data[0].embedding;
+    }
+    return [];
 }
 
 async function send(db: pg.Client): Promise<void> {
@@ -219,7 +242,25 @@ async function send(db: pg.Client): Promise<void> {
         // record the stories sent in the database
         const storyIds = [...storySummaries.keys()];
         await db.query("INSERT INTO digest (stories) VALUES ($1)", [storyIds]);
+
+        // save embeddings
+        for (const [id, summary] of storySummaries) {
+            if (summary) {
+                const embed = await embedding(summary);
+                if (embed.length > 0) {
+                    await db.query(
+                      "UPDATE story SET embedding = $1 WHERE story_id = $2",
+                      [pgvector.toSql(embed), id]
+                    );
+                }
+                await sleep(100);   // avoid voyageai rate limit
+            }
+        }
     }
+}
+
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -231,6 +272,7 @@ export async function run(): Promise<void> {
 
     try {
         await db.connect();
+        await pgvector.registerTypes(db);
         await collect(db);
         await send(db);
     } catch (error) {
