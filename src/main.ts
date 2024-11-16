@@ -1,10 +1,10 @@
 import * as core from "@actions/core";
 import pg from "pg";
-import pgvector from 'pgvector/pg';
+import pgvector from "pgvector/pg";
 import { content } from "./scraper";
 import Anthropic from "@anthropic-ai/sdk";
 import { VoyageAIClient } from "voyageai";
-import { EmbedResponse } from 'voyageai/api';
+import { EmbedResponse } from "voyageai/api";
 
 type TopStories = number[];
 type Story = {
@@ -162,7 +162,7 @@ async function summarize(text: string): Promise<string> {
 async function embedding(text: string): Promise<number[]> {
     const VOYAGEAI_KEY = core.getInput("voyageai-key");
     const voyageai = new VoyageAIClient({
-        apiKey: VOYAGEAI_KEY
+        apiKey: VOYAGEAI_KEY,
     });
 
     if (!VOYAGEAI_KEY || !text) {
@@ -249,18 +249,18 @@ async function send(db: pg.Client): Promise<void> {
                 const embed = await embedding(summary);
                 if (embed.length > 0) {
                     await db.query(
-                      "UPDATE story SET embedding = $1 WHERE story_id = $2",
-                      [pgvector.toSql(embed), id]
+                        "UPDATE story SET embedding = $1 WHERE story_id = $2",
+                        [pgvector.toSql(embed), id],
                     );
                 }
-                await sleep(100);   // avoid voyageai rate limit
+                await sleep(100); // avoid voyageai rate limit
             }
         }
     }
 }
 
 function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
