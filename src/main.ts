@@ -259,7 +259,7 @@ async function send(db: pg.Client): Promise<void> {
     }
 }
 
-function sleep(ms: number) {
+async function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
