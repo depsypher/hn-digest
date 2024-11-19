@@ -261,7 +261,7 @@ async function send(db: pg.Client): Promise<void> {
                         [pgvector.toSql(embed), id],
                     );
                 }
-                await sleep(100); // avoid voyageai rate limit
+                await sleep(250); // avoid voyageai rate limit
             }
         }
     }
