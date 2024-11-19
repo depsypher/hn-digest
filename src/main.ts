@@ -3,7 +3,7 @@ import pg from "pg";
 import pgvector from "pgvector/pg";
 import { content } from "./scraper";
 import Anthropic from "@anthropic-ai/sdk";
-import { VoyageAIClient } from "voyageai";
+import { VoyageAIClient, VoyageAIError } from 'voyageai';
 import { EmbedResponse } from "voyageai/api";
 
 type TopStories = number[];
@@ -168,13 +168,21 @@ async function embedding(text: string): Promise<number[]> {
     if (!VOYAGEAI_KEY || !text) {
         return [];
     }
-    const result: EmbedResponse = await voyageai.embed({
-        input: text,
-        model: "voyage-3-lite",
-    });
+    try {
+        const result: EmbedResponse = await voyageai.embed({
+            input: text,
+            model: "voyage-3-lite",
+        });
 
-    if (result.data && result.data.length === 1 && result.data[0].embedding) {
-        return result.data[0].embedding;
+        if (result.data && result.data.length === 1 && result.data[0].embedding) {
+            return result.data[0].embedding;
+        }
+    } catch (err) {
+        if (err instanceof VoyageAIError) {
+            console.log(err.statusCode);
+            console.log(err.message);
+            console.log(err.body);
+        }
     }
     return [];
 }
