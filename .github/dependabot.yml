@@ -8,7 +8,6 @@ updates:
       actions-minor:
         update-types:
           - minor
-          - patch
 
   - package-ecosystem: npm
     directory: /
