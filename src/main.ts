@@ -295,3 +295,24 @@ export async function run(): Promise<void> {
         await db.end();
     }
 }
+
+/**
+ * For use in local development
+ * @returns {Promise<void>} Resolves when the action is complete.
+ */
+export async function dev(): Promise<void> {
+    const db: pg.Client = getPostgresClient();
+
+    try {
+        await db.connect();
+        await pgvector.registerTypes(db);
+        await collect(db);
+        await send(db);
+    } catch (error) {
+        core.error(`Caught ${error}`);
+        // Fail the workflow run if an error occurs
+        if (error instanceof Error) core.setFailed(error.message);
+    } finally {
+        await db.end();
+    }
+}
