@@ -9,11 +9,11 @@ This github action periodically polls hacker news for stories appearing on the f
 
 ## How it works
 
--   A github actions workflow is configured to collect stories on a schedule (e.g every 4 hours) which get put in the `story` table in the database.
--   On every run the current top stories are upserted, with their scores and comment counts continuously updated.
--   After each run, if the current time is after the `next_send` time, the top stories are queried, the html scraped and a summary of the content is generated. The results are sent to the email(s) set in `config` and `next_send` is incremented.
--   The metric for ranking the best stories is combined percentile rank of score and number of comments for stories collected since the last send.
--   Anthropic is used to summarize, and voyage ai is used to generate vector embeddings of the summary.
+- A github actions workflow is configured to collect stories on a schedule (e.g every 4 hours) which get put in the `story` table in the database.
+- On every run the current top stories are upserted, with their scores and comment counts continuously updated.
+- After each run, if the current time is after the `next_send` time, the top stories are queried, the html scraped and a summary of the content is generated. The results are sent to the email(s) set in `config` and `next_send` is incremented.
+- The metric for ranking the best stories is combined percentile rank of score and number of comments for stories collected since the last send.
+- Anthropic is used to summarize, and voyage ai is used to generate vector embeddings of the summary.
 
 ## You'll need
 
@@ -30,12 +30,12 @@ WIP - I'm currently using this to send myself a daily email digest of hn top sto
 
 Fork the repo. You'll need the following secrets set up in your repo settings for the github action:
 
--   PG_HOST
--   PG_PASSWORD
--   MAILGUN_KEY
--   MAILGUN_DOMAIN
--   ANTHROPIC_KEY
--   VOYAGEAI_KEY
+- PG_HOST
+- PG_PASSWORD
+- MAILGUN_KEY
+- MAILGUN_DOMAIN
+- ANTHROPIC_KEY
+- VOYAGEAI_KEY
 
 Change the email address in `script/init_database.sql` then run it on your postgres database.
 
