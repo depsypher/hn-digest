@@ -174,7 +174,8 @@ async function embedding(text: string): Promise<number[]> {
             model: "voyage-3-lite",
         });
 
-        if (result.data &&
+        if (
+            result.data &&
             result.data.length === 1 &&
             result.data[0].embedding
         ) {

@@ -1,4 +1,4 @@
-import { scrape } from "../src/scraper";
+import { scrape } from "../scraper";
 import { expect } from "@jest/globals";
 
 import { JSDOM } from "jsdom";
