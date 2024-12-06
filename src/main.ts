@@ -174,8 +174,7 @@ async function embedding(text: string): Promise<number[]> {
             model: "voyage-3-lite",
         });
 
-        if (
-            result.data &&
+        if (result.data &&
             result.data.length === 1 &&
             result.data[0].embedding
         ) {
@@ -261,8 +260,8 @@ async function send(db: pg.Client): Promise<void> {
                 const embed = await embedding(summary);
                 if (embed.length > 0) {
                     await db.query(
-                        "UPDATE story SET embedding = $1 WHERE story_id = $2",
-                        [pgvector.toSql(embed), id],
+                        "UPDATE story SET embedding = $1, summary = $2 WHERE story_id = $3",
+                        [pgvector.toSql(embed), summary, id],
                     );
                 }
                 await sleep(250); // avoid voyageai rate limit

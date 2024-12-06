@@ -31,6 +31,7 @@ CREATE TABLE story
     last_seen   TIMESTAMPTZ                  -- Last time we've seen this record
 );
 ALTER TABLE story ADD COLUMN content TEXT;
+ALTER TABLE story ADD COLUMN summary TEXT;
 
 CREATE SEQUENCE seq;
 CREATE TABLE digest
