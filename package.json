@@ -73,7 +73,7 @@
         "jsdom": "^26.0.0",
         "pg": "^8.13.1",
         "pgvector": "^0.2.0",
-        "voyageai": "^0.0.1-5"
+        "voyageai": "^0.0.4"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3.3.0",
