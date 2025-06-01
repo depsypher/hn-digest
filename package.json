@@ -72,7 +72,7 @@
         "@types/jsdom": "^21.1.7",
         "jsdom": "^26.1.0",
         "pg": "^8.15.6",
-        "pgvector": "^0.2.0",
+        "pgvector": "^0.2.1",
         "voyageai": "^0.0.4"
     },
     "devDependencies": {
