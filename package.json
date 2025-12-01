@@ -67,7 +67,7 @@
     },
     "dependencies": {
         "@actions/core": "^1.11.1",
-        "@anthropic-ai/sdk": "^0.65.0",
+        "@anthropic-ai/sdk": "^0.71.0",
         "@mozilla/readability": "^0.6.0",
         "@types/jsdom": "^21.1.7",
         "jsdom": "^26.1.0",
