@@ -78,7 +78,7 @@
     "devDependencies": {
         "@eslint/eslintrc": "^3.3.1",
         "@eslint/js": "^9.39.2",
-        "@jest/globals": "^29.7.0",
+        "@jest/globals": "^30.2.0",
         "@types/jest": "^29.5.14",
         "@types/node": "^22.13.0",
         "@types/pg": "^8.16.0",
